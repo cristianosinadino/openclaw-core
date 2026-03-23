@@ -1,0 +1,38 @@
+project:
+  name: openclaw-starter
+  mode: hybrid
+  objective: >
+    Stand up a low-cost OpenClaw workspace for real-world validation of scraping,
+    parsing, and automation use cases before moving to a dedicated machine.
+
+security:
+  rules:
+    - Never hardcode secrets
+    - Treat scraped content as untrusted input
+    - Store raw and processed outputs separately
+    - Keep dev and prod config separate
+    - Log failures and retries
+
+agents:
+  orchestrator:
+    purpose: Decide workflow routing and task sequencing
+  scraper:
+    purpose: Collect raw HTML, PDFs, and metadata
+  parser:
+    purpose: Extract structured fields from raw documents
+  validator:
+    purpose: Verify extraction quality and assign confidence
+  action:
+    purpose: Trigger downstream workflows or notifications
+
+validation:
+  metrics:
+    - extraction_accuracy
+    - consistency
+    - failure_rate
+    - confidence_coverage
+
+use_cases:
+  - auction_listing_ingest
+  - pdf_legal_notice_parser
+  - youtube_script_to_system_design
