@@ -1,0 +1,19 @@
+# System Validation Domain Model Policy
+# Inherits from config/models/core-model-policy.yaml
+
+overrides:
+  task_classes:
+    A_strategic_reasoning:
+      default_model: openai/gpt-5.1-codex
+      fallback_model: openai/gpt-5
+    B_code_generation:
+      default_model: openai/gpt-5.1-codex
+      fallback_model: openai/gpt-5
+    C_code_review_validation:
+      default_model: openai/gpt-5.1-codex
+      fallback_model: openai/gpt-5
+    D_document_analysis:
+      default_model: openai/gpt-5
+      fallback_model: openai/gpt-5-mini
+  routing_notes:
+    - System observability touchpoints are high-risk if they affect multiple projects; keep them on tier-1 models.

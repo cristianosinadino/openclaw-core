@@ -1,0 +1,23 @@
+{
+  "global": {
+    "dailyTokens": 500000,
+    "alertPercent": 0.85
+  },
+  "projects": {
+    "system-validation": {
+      "dailyTokens": 50000,
+      "downgradeCapability": "summarize_cheap"
+    },
+    "default": {
+      "dailyTokens": 80000,
+      "downgradeCapability": "summarize_cheap"
+    }
+  },
+  "agents": {
+    "orchestrator": { "maxTokens": 10000 },
+    "parser": { "maxTokens": 6000 },
+    "validator": { "maxTokens": 5000 },
+    "summarizer": { "maxTokens": 4000 },
+    "default": { "maxTokens": 6000 }
+  }
+}

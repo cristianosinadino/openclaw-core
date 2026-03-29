@@ -1,0 +1,96 @@
+# Salesforce Lab — Domain Model Policy
+# Layer: Domain
+# Inherits: config/models/core-model-policy.yaml
+# Overridden by: initiatives/<name>/model-policy.yaml
+#
+# This file narrows or tightens core defaults for the Salesforce domain.
+# It may not loosen core routing_rules (RULE-001 through RULE-005).
+# It may only assign stricter models or raise the minimum tier for a task class.
+
+# ─────────────────────────────────────────────────────────────
+# DOMAIN RATIONALE
+# Salesforce development involves:
+# - Apex/LWC code that runs in production orgs
+# - Custom Metadata-driven configuration with hard API name constraints
+# - FSC data model compliance requirements
+# - Integration contracts with external systems
+#
+# This makes correctness and hallucination risk higher than typical domains.
+# Domain defaults raise the floor for coding and review tasks.
+# ─────────────────────────────────────────────────────────────
+
+domain: salesforce-lab
+
+overrides:
+
+  B_code_generation:
+    reason: >
+      Salesforce code (Apex, LWC, SOQL) has strict API name contracts and
+      deployment gate requirements. Weak code generation fails silently.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    cost_sensitivity: low  # correctness > cost for Salesforce code
+
+  C_code_review_validation:
+    reason: >
+      Rule compliance and architecture alignment in FSC carries production risk.
+      Tier-1 is mandatory; no downgrade permitted at any initiative layer.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    cost_sensitivity: low
+    override_lock: true  # initiatives may NOT override this class below tier-1
+
+  D_document_analysis:
+    reason: >
+      Salesforce requirements and ADRs contain field-level mappings and
+      compliance constraints. Extraction errors propagate into implementation.
+    min_tier: 2
+    preferred_model: openai/gpt-5
+    fallback_model: openai/gpt-5-mini
+
+  A_strategic_reasoning:
+    reason: >
+      FSC architecture decisions have long-lived consequences.
+      Tier-1 required; no override permitted below tier-1.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    override_lock: true
+
+# ─────────────────────────────────────────────────────────────
+# DOMAIN TASK PATTERNS
+# Common task patterns specific to Salesforce and their class mapping.
+# Used by agents to classify tasks before routing.
+# ─────────────────────────────────────────────────────────────
+
+task_patterns:
+  - pattern: "generate Apex class or trigger"
+    maps_to: B_code_generation
+
+  - pattern: "generate LWC component or controller"
+    maps_to: B_code_generation
+
+  - pattern: "review Apex for rule compliance"
+    maps_to: C_code_review_validation
+
+  - pattern: "check LWC against architecture constraints"
+    maps_to: C_code_review_validation
+
+  - pattern: "design FSC object model or integration pattern"
+    maps_to: A_strategic_reasoning
+
+  - pattern: "digest requirements or user story"
+    maps_to: D_document_analysis
+
+  - pattern: "extract field mapping from CSV or spec"
+    maps_to: E_extraction_classification
+
+  - pattern: "summarize session notes or ADR"
+    maps_to: D_document_analysis
+
+  - pattern: "generate boilerplate SOQL or config"
+    maps_to: F_workflow_chatter
+
+  - pattern: "normalize or reformat extracted Salesforce data"
+    maps_to: G_parsing_repair

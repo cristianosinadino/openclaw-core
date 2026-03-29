@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>OpenClaw Mission Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <section>
+          <h2>Projects</h2>
+          <ul id="project-list"></ul>
+        </section>
+        <section>
+          <h2>Memory</h2>
+          <div class="memory-block">
+            <h3>Long-term</h3>
+            <ul id="long-term-list"></ul>
+          </div>
+          <div class="memory-block">
+            <h3>Journal</h3>
+            <ul id="journal-list"></ul>
+          </div>
+        </section>
+        <section>
+          <h2>Agents</h2>
+          <div id="agent-status"></div>
+        </section>
+      </aside>
+      <main>
+        <header class="toolbar">
+          <div>
+            <span id="active-project-label">Project: global</span>
+          </div>
+          <div class="toolbar-actions">
+            <input type="search" id="timeline-search" placeholder="Search timeline" />
+            <button id="refresh-btn">Refresh</button>
+          </div>
+        </header>
+        <section id="timeline"></section>
+      </main>
+    </div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

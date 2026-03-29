@@ -12,22 +12,20 @@ This README is a contract for how initiatives in this folder are run. It defines
 - Initiative concerns stay local to this lab (`requirements`, `docs`, `rules`, `context`).
 - No initiative-specific logic should leak into global core folders.
 
-## 2) Rule Hierarchy (Override Order)
+## 2) Rule Hierarchy
 
-When instructions conflict, apply this precedence top to bottom (higher item wins):
+Rules are applied in increasing specificity order (most specific wins):
 
-1. Explicit user request for current task
-2. Initiative-level `rules/AGENTS.md`
-3. Initiative rule packs under `rules/*`
-4. Initiative architecture and implementation docs in `docs/`
-5. Repository root guidance in `README.md` and root configuration
+1. Core rules — `CORE_RULES.md` at repo root; applies everywhere; the baseline
+2. Domain rules — `projects/salesforce-lab/rules/`; Salesforce-specific constraints that apply to all initiatives
+3. Initiative rules — `initiatives/<name>/rules/`; most specific; overrides domain and core
 
 Operational rules:
 
-- Never violate higher-precedence instructions to satisfy lower-precedence guidance.
+- More specific layers override less specific ones. Overrides must be explicit.
 - If two sources at the same level conflict, stop and request clarification.
 - Record important decisions in initiative docs or ADRs so future runs remain consistent.
-- Global baseline precedence is defined in `CORE_RULES.md`; this contract extends it for Salesforce Lab initiative execution.
+- This domain contract extends `CORE_RULES.md` for Salesforce Lab. It does not replace it.
 
 ## 3) Agent Execution Model (OpenClaw-Aligned)
 

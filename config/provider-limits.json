@@ -1,0 +1,26 @@
+{
+  "providers": {
+    "openai": {
+      "requestsPerMinute": 120,
+      "tokensPerMinute": 240000
+    }
+  },
+  "models": {
+    "openai/gpt-5.1-codex": { "requestsPerMinute": 60, "tokensPerMinute": 120000 },
+    "openai/gpt-5": { "requestsPerMinute": 60, "tokensPerMinute": 120000 },
+    "openai/gpt-5-mini": { "requestsPerMinute": 90, "tokensPerMinute": 90000 },
+    "openai/gpt-4.1-mini": { "requestsPerMinute": 120, "tokensPerMinute": 60000 },
+    "openai/gpt-4o-mini": { "requestsPerMinute": 180, "tokensPerMinute": 60000 }
+  },
+  "projects": {
+    "system-validation": { "requestsPerMinute": 30, "tokensPerMinute": 120000 },
+    "default": { "requestsPerMinute": 60, "tokensPerMinute": 60000 }
+  },
+  "agents": {
+    "orchestrator": { "requestsPerMinute": 20 },
+    "parser": { "requestsPerMinute": 30 },
+    "validator": { "requestsPerMinute": 25 },
+    "summarizer": { "requestsPerMinute": 40 },
+    "default": { "requestsPerMinute": 30 }
+  }
+}

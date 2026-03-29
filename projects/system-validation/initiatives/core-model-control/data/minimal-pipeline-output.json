@@ -1,0 +1,7 @@
+{
+  "input": "Mission Control must remain observable even when workloads spike.",
+  "summary": "Mission Control must remain observable even when workloads spike.",
+  "model": "gpt-4o-mini",
+  "capability": "summarize_cheap",
+  "timestamp": "2026-03-23T23:25:42.715Z"
+}

@@ -1,0 +1,48 @@
+{
+  "capabilities": {
+    "reasoning_high": {
+      "description": "High-reliability strategic reasoning",
+      "candidates": [
+        { "provider": "openai", "model": "gpt-5.1-codex", "tier": "tier1" },
+        { "provider": "openai", "model": "gpt-5", "tier": "tier1" }
+      ],
+      "downgradeTo": "summarize_cheap"
+    },
+    "extract_structured": {
+      "description": "Structured extraction / parsing",
+      "candidates": [
+        { "provider": "openai", "model": "gpt-5-mini", "tier": "tier2" },
+        { "provider": "openai", "model": "gpt-4.1-mini", "tier": "tier3" }
+      ],
+      "downgradeTo": "summarize_cheap"
+    },
+    "validate_light": {
+      "description": "Low-cost validation + QA",
+      "candidates": [
+        { "provider": "openai", "model": "gpt-5-mini", "tier": "tier2" },
+        { "provider": "openai", "model": "gpt-4.1-mini", "tier": "tier3" }
+      ],
+      "downgradeTo": "summarize_cheap"
+    },
+    "summarize_cheap": {
+      "description": "Cheapest acceptable summarization",
+      "candidates": [
+        { "provider": "openai", "model": "gpt-4o-mini", "tier": "tier3" },
+        { "provider": "openai", "model": "gpt-4.1-mini", "tier": "tier3" }
+      ],
+      "downgradeTo": null
+    }
+  },
+  "defaults": {
+    "orchestrator": "reasoning_high",
+    "parser": "extract_structured",
+    "validator": "validate_light",
+    "summarizer": "summarize_cheap"
+  },
+  "fallbackPolicy": {
+    "maxRetries": 3,
+    "backoffBaseMs": 150,
+    "backoffMaxMs": 1200,
+    "jitterMs": 75
+  }
+}

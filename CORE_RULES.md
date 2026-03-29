@@ -1,12 +1,17 @@
 # Core Governance Rules
 
 ## Hierarchy & Precedence
-1. Explicit user instructions for the active task
-2. Initiative execution contract (initiative README + initiative rules)
-3. Core/global rules (this document, SOUL.md, USER.md)
-4. Default OpenClaw behavior
 
-Lower layers cannot weaken higher layers. If conflicts appear, halt and request clarification.
+Rules are applied in this order (lowest to highest specificity):
+
+1. Core rules — this document; baseline for every layer; cannot be overridden silently
+2. Domain rules — `projects/<domain>/rules/`; inherits Core, may add stricter constraints
+3. Initiative rules — `projects/<domain>/initiatives/<name>/rules/`; most specific; overrides Domain and Core
+
+Conflict resolution:
+- More specific layers (Initiative > Domain > Core) take precedence.
+- Overrides must be explicit. Silent override is not allowed.
+- If a conflict cannot be resolved, halt and request clarification before continuing.
 
 ## Lifecycle (applies to every workflow)
 INTAKE → CONTEXT → PLAN → EXECUTE → VALIDATE → DOCUMENT → HANDOFF. No stage may be skipped.

@@ -1,0 +1,75 @@
+# Approved AI Providers and Models
+# Source of truth for all model aliases used in policy files.
+# Do not reference a model in any policy unless it is registered here.
+
+providers:
+
+  openai:
+    enabled: true
+    models:
+      gpt-5.1-codex:
+        alias: GPT-Heavy
+        tier: 1
+        strengths: [reasoning, code-generation, code-review, tool-use, long-context]
+        context_window: large
+        cost: high
+        latency: medium
+
+      gpt-5:
+        alias: GPT-Medium
+        tier: 2
+        strengths: [code-generation, document-analysis, workflow-authoring, review]
+        context_window: medium
+        cost: medium
+        latency: medium
+
+      gpt-5-mini:
+        alias: GPT-Light
+        tier: 2
+        strengths: [code-generation, document-analysis, summarization]
+        context_window: medium
+        cost: low-medium
+        latency: fast
+
+      gpt-4.1-mini:
+        alias: GPT-Cheap
+        tier: 3
+        strengths: [extraction, classification, formatting, low-risk-generation]
+        context_window: small-medium
+        cost: low
+        latency: fast
+
+      gpt-4o-mini:
+        alias: GPT-UltraCheap
+        tier: 3
+        strengths: [tagging, reformatting, metadata-extraction, batch-preprocessing]
+        context_window: small
+        cost: very-low
+        latency: very-fast
+
+  local:
+    enabled: false
+    note: >
+      Reserved for privacy-sensitive experiments, batch low-risk processing,
+      and offline rough work. Must not be used for high-stakes reasoning
+      unless explicitly proven reliable for that task class.
+    models: {}
+
+tiers:
+  1:
+    label: Premium Reasoning / Coding
+    description: Architecture, critical code generation, validation, cross-document synthesis, high-stakes decisions
+    cost_floor: high
+    risk_ceiling: high
+
+  2:
+    label: Standard Capable
+    description: Most implementation tasks, standard code, document digestion, workflow authoring
+    cost_floor: medium
+    risk_ceiling: medium
+
+  3:
+    label: Cheap Utility
+    description: Tagging, reformatting, metadata extraction, low-risk transformation, draft summaries
+    cost_floor: low
+    risk_ceiling: low

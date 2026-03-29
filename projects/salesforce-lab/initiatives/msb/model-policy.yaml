@@ -1,0 +1,127 @@
+# MSB Initiative — Model Policy
+# Layer: Initiative
+# Inherits: projects/salesforce-lab/model-policy.yaml → config/models/core-model-policy.yaml
+# This is the most specific layer. Overrides domain defaults where stated.
+# May not loosen domain override_lock classes or core RULE-001 through RULE-005.
+
+initiative: msb
+domain: salesforce-lab
+
+# ─────────────────────────────────────────────────────────────
+# INITIATIVE RATIONALE
+# MSB (Main Street Bank) implements a Deposit Account Opening wizard
+# on Salesforce FSC. Key characteristics:
+#
+# - Multi-step LWC wizard with Custom Metadata-driven configuration
+# - Apex service layer (fflib patterns) with financial compliance rules
+# - Bidirectional integration with external DAO system
+# - KYB/KYC compliance constraints on data handling
+# - Architecture decisions with long-lived production consequences
+#
+# Risk profile: higher than average Salesforce initiative.
+# Cost tolerance: low — correctness is non-negotiable on financial data.
+# ─────────────────────────────────────────────────────────────
+
+overrides:
+
+  A_strategic_reasoning:
+    reason: >
+      MSB architecture touches financial compliance, KYB/KYC integration,
+      and bidirectional sync patterns. Tier-1 is required and no downgrade
+      is permitted for this initiative.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    override_lock: true
+
+  B_code_generation:
+    reason: >
+      Apex and LWC code in MSB must respect fflib service layer patterns,
+      Custom Metadata bindings, and strict field API name contracts.
+      Tier-1 only.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    cost_sensitivity: low
+
+  C_code_review_validation:
+    reason: >
+      Inherited lock from domain. Confirmed at initiative level.
+      No downgrade under any circumstance.
+    min_tier: 1
+    preferred_model: openai/gpt-5.1-codex
+    override_lock: true
+
+  D_document_analysis:
+    reason: >
+      MSB requirements contain compliance-critical field mappings and
+      acceptance criteria. Digest errors propagate into production Apex.
+    min_tier: 2
+    preferred_model: openai/gpt-5
+    fallback_model: openai/gpt-5-mini
+
+  E_extraction_classification:
+    reason: >
+      Field mapping extraction and status tagging are low-risk here.
+      Domain default (tier-3) is acceptable.
+    inherits_domain_default: true
+
+  F_workflow_chatter:
+    reason: >
+      Boilerplate summaries and low-risk drafts. Domain default acceptable.
+    inherits_domain_default: true
+
+  G_parsing_repair:
+    reason: >
+      Transcript and data normalization. Domain default acceptable.
+    inherits_domain_default: true
+
+# ─────────────────────────────────────────────────────────────
+# INITIATIVE-SPECIFIC TASK PATTERNS
+# Narrows Salesforce Lab patterns to MSB component vocabulary.
+# ─────────────────────────────────────────────────────────────
+
+task_patterns:
+  - pattern: "implement or update daoWizardContainer or daoWizardStepRouter"
+    maps_to: B_code_generation
+    notes: wizard shell — tier-1 required
+
+  - pattern: "implement DaoWizardPersistenceService or DaoWizardDataService"
+    maps_to: B_code_generation
+    notes: service layer — tier-1 required
+
+  - pattern: "implement DaoComplianceRules"
+    maps_to: B_code_generation
+    notes: compliance logic — tier-1; flag for additional review
+
+  - pattern: "design or update DAO_Primary_Document__mdt or Wizard_Step__mdt"
+    maps_to: A_strategic_reasoning
+    notes: CMDT configuration — architecture class
+
+  - pattern: "validate Apex against MSB rules or fflib patterns"
+    maps_to: C_code_review_validation
+
+  - pattern: "interpret KYB or KYC compliance requirement"
+    maps_to: A_strategic_reasoning
+    notes: compliance interpretation — tier-1, high risk
+
+  - pattern: "extract field mapping from MSB spec or CSV"
+    maps_to: E_extraction_classification
+
+  - pattern: "summarize ADR or implementation note"
+    maps_to: D_document_analysis
+
+# ─────────────────────────────────────────────────────────────
+# EXPERIMENTS
+# Document any temporary model experiments here.
+# Must include: rationale, scope, expiry, and owner.
+# ─────────────────────────────────────────────────────────────
+
+experiments: []
+# example:
+# - id: EXP-001
+#   task_class: D_document_analysis
+#   test_model: openai/gpt-5-mini
+#   rationale: test cost reduction for non-compliance doc digestion
+#   scope: non-compliance requirements only
+#   expiry: 2026-04-01
+#   owner: Cristiano

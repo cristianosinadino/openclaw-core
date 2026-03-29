@@ -1,0 +1,198 @@
+# Core Model Policy
+# Layer: Core
+# Applies to: every domain and initiative in openclaw-core
+# Overridden by: domain model-policy.yaml → initiative model-policy.yaml
+#
+# Source of approved models: config/models/providers.yaml
+# Do not add models here that are not registered in providers.yaml.
+
+# ─────────────────────────────────────────────────────────────
+# TASK CLASSES
+# Defines the canonical set of task types and their routing defaults.
+# Domain/initiative policies may only narrow within these classes.
+# ─────────────────────────────────────────────────────────────
+
+task_classes:
+
+  A_strategic_reasoning:
+    description: >
+      Architecture decisions, tradeoff analysis, system design, conflict resolution,
+      ambiguous requirement interpretation.
+    needs: [strong-reasoning, high-reliability, long-context]
+    default_tier: 1
+    default_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    risk: high
+    cost_sensitivity: low
+    latency_sensitivity: low
+    context_size: large
+    output_determinism: medium
+    tool_dependence: high
+
+  B_code_generation:
+    description: >
+      Apex, LWC, scripts, workflow logic, config generation.
+    needs: [strong-coding-quality, instruction-following, decent-context]
+    default_tier: 1
+    default_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    risk: medium
+    cost_sensitivity: medium
+    latency_sensitivity: medium
+    context_size: medium
+    output_determinism: high
+    tool_dependence: high
+
+  C_code_review_validation:
+    description: >
+      Rule compliance checks, architecture alignment, bug/risk spotting,
+      completeness review.
+    needs: [careful-reasoning, consistency, low-hallucination]
+    default_tier: 1
+    default_model: openai/gpt-5.1-codex
+    fallback_model: openai/gpt-5
+    risk: high
+    cost_sensitivity: low
+    latency_sensitivity: low
+    context_size: medium
+    output_determinism: high
+    tool_dependence: medium
+
+  D_document_analysis:
+    description: >
+      Requirements digestion, ADR review, parsing design docs,
+      transcript digestion, structured summarization.
+    needs: [long-context, extraction-reliability, formatting-discipline]
+    default_tier: 2
+    default_model: openai/gpt-5
+    fallback_model: openai/gpt-5-mini
+    risk: medium
+    cost_sensitivity: medium
+    latency_sensitivity: low
+    context_size: large
+    output_determinism: medium
+    tool_dependence: low
+
+  E_extraction_classification:
+    description: >
+      Lightweight tagging, labeling docs, routing, metadata extraction,
+      status detection.
+    needs: [cheap, fast, reliable-enough]
+    default_tier: 3
+    default_model: openai/gpt-4.1-mini
+    fallback_model: openai/gpt-4o-mini
+    risk: low
+    cost_sensitivity: high
+    latency_sensitivity: high
+    context_size: small
+    output_determinism: high
+    tool_dependence: low
+
+  F_workflow_chatter:
+    description: >
+      Boilerplate summaries, simple formatting, low-risk drafts,
+      routine transformations.
+    needs: [low-cost, fast, good-enough]
+    default_tier: 3
+    default_model: openai/gpt-4o-mini
+    fallback_model: openai/gpt-4.1-mini
+    risk: low
+    cost_sensitivity: high
+    latency_sensitivity: high
+    context_size: small
+    output_determinism: low
+    tool_dependence: low
+
+  G_parsing_repair:
+    description: >
+      Cleaning transcript output, normalizing extracted data,
+      restructuring messy text.
+    needs: [cheap-to-medium, high-repetition-tolerance]
+    default_tier: 3
+    default_model: openai/gpt-4.1-mini
+    fallback_model: openai/gpt-4o-mini
+    risk: low
+    cost_sensitivity: high
+    latency_sensitivity: medium
+    context_size: small-medium
+    output_determinism: medium
+    tool_dependence: low
+
+# ─────────────────────────────────────────────────────────────
+# SELECTION CRITERIA
+# Dimensions used by the task router to select or override models.
+# ─────────────────────────────────────────────────────────────
+
+selection_criteria:
+
+  risk:
+    description: What happens if the model is wrong?
+    levels: [low, medium, high]
+    rule: high-risk tasks must use tier-1 models; never default to cheap for high-risk
+
+  cost_sensitivity:
+    description: Do we need the cheapest acceptable option?
+    levels: [low, medium, high]
+
+  latency_sensitivity:
+    description: Does this need to return quickly?
+    levels: [low, medium, high]
+
+  context_size:
+    description: How much material must the model read?
+    levels: [small, medium, large]
+    rule: large-context tasks must use models with large context_window in providers.yaml
+
+  output_determinism:
+    description: Do we need tight formatting and repeatability?
+    levels: [low, medium, high]
+
+  tool_dependence:
+    description: Will the model need to use tools, inspect structure, or reason across artifacts?
+    levels: [low, high]
+    rule: high tool_dependence requires a model with tool-use in its strengths
+
+# ─────────────────────────────────────────────────────────────
+# ROUTING RULES
+# Hard guardrails that cannot be overridden at any layer.
+# ─────────────────────────────────────────────────────────────
+
+routing_rules:
+
+  - id: RULE-001
+    rule: High-risk tasks must always use a tier-1 model.
+    enforced: true
+
+  - id: RULE-002
+    rule: >
+      Tasks with tool_dependence=high must only use models that list
+      tool-use in their strengths in providers.yaml.
+    enforced: true
+
+  - id: RULE-003
+    rule: >
+      Large context tasks must only use models with context_window=large
+      or context_window=medium in providers.yaml.
+    enforced: true
+
+  - id: RULE-004
+    rule: >
+      Local/self-hosted models must not be used for tasks where risk=high
+      unless the model has been explicitly validated for that task class
+      and the exception is documented in the initiative model-policy.yaml.
+    enforced: true
+
+  - id: RULE-005
+    rule: >
+      If no domain or initiative override is present, task_classes defaults apply.
+      If a model is unavailable, use the defined fallback_model, never an unlisted model.
+    enforced: true
+
+# ─────────────────────────────────────────────────────────────
+# FALLBACK BEHAVIOR
+# ─────────────────────────────────────────────────────────────
+
+fallback_behavior:
+  on_model_unavailable: use fallback_model defined in task class
+  on_fallback_unavailable: halt and report; do not silently use an unapproved model
+  on_missing_task_class: default to A_strategic_reasoning (safest tier)

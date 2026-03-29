@@ -1,0 +1,8 @@
+{
+  "object": "Account",
+  "fields": [
+    "Name",
+    "Phone",
+    "Industry"
+  ]
+}
