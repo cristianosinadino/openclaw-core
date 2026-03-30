@@ -6,6 +6,7 @@ const url = require('url');
 const memoryService = require('./services/memoryService');
 const timelineService = require('./services/timelineService');
 const agentLogger = require('./services/agentLogger');
+const { executePrompt } = require('./services/promptExecutor');
 
 const PORT = process.env.PORT || 4141;
 const PROJECTS_DIR = path.join(__dirname, 'projects');
@@ -140,6 +141,28 @@ async function handleRequest(req, res) {
 
   if (req.method === 'GET' && pathname === '/healthz') {
     sendJSON(res, 200, { status: 'ok', timestamp: new Date().toISOString() });
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/prompt') {
+    let body = '';
+    req.on('data', (chunk) => { body += chunk; });
+    req.on('end', async () => {
+      let prompt;
+      try {
+        ({ prompt } = JSON.parse(body));
+      } catch {
+        sendJSON(res, 400, { error: 'Invalid JSON body' });
+        return;
+      }
+      if (!prompt || typeof prompt !== 'string') {
+        sendJSON(res, 400, { error: 'Missing prompt string' });
+        return;
+      }
+
+      const result = await executePrompt({ prompt });
+      sendJSON(res, result.status === 'error' ? 500 : 200, result);
+    });
     return;
   }
 

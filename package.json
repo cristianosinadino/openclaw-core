@@ -1,0 +1,21 @@
+{
+  "name": "openclaw-core",
+  "version": "0.1.0",
+  "description": "Portable AI execution layer for OpenClaw verticals",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test:llm": "node scripts/test-llm.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.0.0"
+  },
+  "openclaw": {
+    "extensions": ["plugin.js"]
+  }
+}

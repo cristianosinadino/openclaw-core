@@ -4,3 +4,15 @@
 # Local Salesforce org describe dumps (large, org-specific)
 account_describe.json
 **/account_describe.json
+*_org_validation.json
+salesforce_org_validation.json
+
+# Node
+node_modules/
+
+# Runtime / local telemetry (regenerates)
+data/runtime/
+
+# Local logs
+logs/
+*.log

@@ -5,12 +5,11 @@ const fs = require('fs/promises');
 const path = require('path');
 
 const PROJECT_ROOT = path.join(__dirname, '../../../../..');
-const INPUT_PATH = path.join(PROJECT_ROOT, 'salesforce_spec.json');
-const OUTPUT_PATH = path.join(PROJECT_ROOT, 'salesforce_org_validation.json');
+const INPUT_PATH = path.join(PROJECT_ROOT, 'contact_spec.json');
+const OUTPUT_PATH = path.join(PROJECT_ROOT, 'contact_org_validation.json');
 
 const requestExecutor = require(path.join(PROJECT_ROOT, 'services/requestExecutor'));
 
-// --- Deterministic layer: org alias resolved here, never passed to LLM ---
 const SF_ORG = process.env.SF_ORG || 'sina-fsc';
 
 function fetchOrgFields(objectName) {
@@ -44,10 +43,8 @@ function isValidResult(r) {
 async function run() {
   console.log(`Using Salesforce org: ${SF_ORG}`);
 
-  // --- Deterministic: read spec ---
   const spec = JSON.parse(await fs.readFile(INPUT_PATH, 'utf8'));
 
-  // --- Deterministic: fetch real schema from org ---
   let realFields;
   try {
     realFields = fetchOrgFields(spec.object);
@@ -56,7 +53,6 @@ async function run() {
     process.exit(1);
   }
 
-  // --- LLM reasoning layer: compare spec vs real schema ---
   const prompt = [
     'You are a Salesforce schema validator.',
     'Compare the required fields from the spec against the real schema fields fetched from the org.',

@@ -1,8 +1,19 @@
+const Anthropic = require('@anthropic-ai/sdk');
 const modelRouter = require('./modelRouter');
 const rateLimiter = require('./rateLimiter');
 const tokenBudget = require('./tokenBudget');
 const providerHealth = require('./providerHealth');
 const modelControlLogger = require('./modelControlLogger');
+
+let _anthropicClient = null;
+function getAnthropicClient() {
+  if (!_anthropicClient) {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set');
+    _anthropicClient = new Anthropic({ apiKey });
+  }
+  return _anthropicClient;
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,7 +27,39 @@ function calcBackoff(attempt, policy) {
   return delay;
 }
 
-async function simulateModelCall(payload, candidate) {
+function buildMessages(payload) {
+  if (Array.isArray(payload.messages) && payload.messages.length > 0) {
+    return payload.messages;
+  }
+  const text = payload.prompt || payload.input || '';
+  return [{ role: 'user', content: text }];
+}
+
+async function callAnthropicProvider(payload, candidate) {
+  const client = getAnthropicClient();
+  const model = candidate.model || 'claude-sonnet-4-6';
+  const messages = buildMessages(payload);
+
+  const result = await client.messages.create({
+    model,
+    max_tokens: payload.max_tokens || 1024,
+    ...(payload.system ? { system: payload.system } : {}),
+    messages,
+  });
+
+  return {
+    text: result.content?.[0]?.text ?? '',
+    usage: {
+      input_tokens: result.usage?.input_tokens ?? 0,
+      output_tokens: result.usage?.output_tokens ?? 0,
+    },
+    model: result.model,
+    provider: 'anthropic',
+  };
+}
+
+async function callProvider(payload, candidate) {
+  // Simulation flags preserved for test harness use
   if (payload.simulateFailures?.includes(candidate.model)) {
     const error = new Error('Simulated provider failure');
     error.nonRetryable = true;
@@ -28,19 +71,11 @@ async function simulateModelCall(payload, candidate) {
     throw error;
   }
 
-  if (payload.operation === 'summarize') {
-    const sentence = (payload.input || '').trim().replace(/\s+/g, ' ');
-    const truncated = sentence.length > 180 ? `${sentence.slice(0, 177)}...` : sentence;
-    return {
-      text: truncated || 'Empty input',
-      model: candidate.model,
-    };
+  if (candidate.provider === 'anthropic') {
+    return callAnthropicProvider(payload, candidate);
   }
 
-  return {
-    echo: payload,
-    model: candidate.model,
-  };
+  throw new Error(`Unsupported provider: ${candidate.provider}`);
 }
 
 async function execute({ capability, agent, project = 'global', payload = {}, estimatedTokens = 0, visited = new Set() }) {
@@ -112,7 +147,7 @@ async function execute({ capability, agent, project = 'global', payload = {}, es
       }
 
       try {
-        const response = await simulateModelCall(payload, candidate);
+        const response = await callProvider(payload, candidate);
         await providerHealth.reportSuccess(candidate.provider);
         await modelControlLogger.log({
           event: 'request_success',

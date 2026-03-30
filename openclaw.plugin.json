@@ -1,0 +1,7 @@
+{
+  "id": "openclaw-core",
+  "name": "OpenClaw Core Workflows",
+  "description": "Salesforce workflow execution for openclaw-core",
+  "version": "0.1.0",
+  "configSchema": {}
+}
